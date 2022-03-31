@@ -43,9 +43,9 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
       .status(400)
       .send({ success: false, messgae: error.details[0].message });
 
-  const { userId, orderslistId } = req.body;
+  const { userId, order_listId } = req.body;
   //map orderlist to it ids
-  const ids = orderslistId.map((orderlist) => orderlist.id);
+  const ids = order_listId.map((orderlist) => orderlist.id);
 
   //Get all selected items
   const items = await OrderList.find({ _id: ids });
@@ -60,9 +60,9 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
   console.log("order created", order);
 
   //mapping order id to order details
-  const mappedOrderDetail = await orderslistId.map((orderlist) => ({
+  const mappedOrderDetail = await order_listId.map((orderlist) => ({
     orderId: order._id,
-    orderlistId: orderlist.id,
+    order_listId: orderlist.id,
     quantity: orderlist.qty,
   }));
   const orderDetails = await OrderDetails.insertMany(mappedOrderDetail);

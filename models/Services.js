@@ -11,6 +11,10 @@ const ServicesSchema = new mongoose.Schema(
       type: String,
       enum: ["wash", "fold", "iron", "dry", "cleaning"],
     },
+    duration: {
+      type: Number,
+      required: [true, "Please add subject tutorial duration"],
+    },
     orderList: {
       type: Schema.Types.ObjectId,
       ref: "OrderList",

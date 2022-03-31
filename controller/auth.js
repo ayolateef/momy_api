@@ -1,3 +1,4 @@
+const path = require("path");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const User = require("../models/User");
@@ -50,17 +51,6 @@ exports.verifyPhoneNum = asyncHandler(async (req, res, next) => {
     message: "OTP sended to your registered phone number",
     data: { userId: user._id },
   });
-
-  //generate otp
-  const otp = generateOTP(6);
-  // save otp to user collection
-  user.phoneOtp = otp;
-  await user.save();
-  //send otp to phone number
-  await fast2sms({
-    message: `OTP is ${otp}`,
-    contactNumber: user.phone,
-  });
 });
 
 /**
@@ -84,7 +74,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Invalid phone number or password ", 400));
 
   //generate a token for the user
-  sendTokenResponse(user, 201, res);
+  sendTokenResponse(user, 200, res);
 });
 
 /**
@@ -183,4 +173,67 @@ exports.uploadDocuments = asyncHandler(async (req, res, next) => {
   if (!req.files) {
     return next(new ErrorResponse(`Please upload a file`, 400));
   }
+  const file = req.files.file;
+  //make sure its a file
+  if (!file.mimetype.startWith("doc")) {
+    return next(new ErrorResponse(`Please upload a doctype file`, 400));
+  }
+  //check filesize
+  if (file.size > MAX_FILE_UPLOAD) {
+    return next(
+      new ErrorResponse(
+        `Please upload a file less than ${process.env.MAX_FILE_UPLOAD}`,
+        400
+      )
+    );
+  }
+  // Create custom filename
+  file.name = `doc_${service._id} }${path.parse(file.name).ext} `;
+  //upload the file
+  file.mv(`${process.env.FILE_UPLOAD}/${file.name}`, async (err) => {
+    if (err) {
+      return next(new ErrorResponse(`Problem with file upload`, 500));
+    }
+    // insert the filename into the db
+    await Service.findByIdAndUpdate(req.params.id, { document: file.name });
+
+    res.status(200).json({ success: true, data: file.name });
+  });
+});
+
+/**
+ * Update user details
+ */
+exports.updateDetails = asyncHandler(async (req, res, next) => {
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
+});
+
+/**
+ * Update user password
+ */
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("password");
+
+  //Check current passord
+  if (!(await user.matchPassword(req.body.currentPassword))) {
+    return next(new ErrorResponse("Password is incorrect", 401));
+  }
+
+  user.password = req.body.newPassword;
+  await user.save();
+
+  sendTokenResponse(user, 200, res);
 });
