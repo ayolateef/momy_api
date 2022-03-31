@@ -1,12 +1,12 @@
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 const sendEmail = require("../utils/sendEmail");
-
 const User = require("../models/User");
-const Booking = require("../models/Bookings");
+const Booking = require("../models/Booking");
 const Order = require("../models/Order");
 const Vendor = require("../models/Vendor");
-const Service = require("../models/Service");
+const Service = require("../models/Services");
+const OrderDetails = require("../models/OrderDetails");
 
 /**
  * Create booking
@@ -28,13 +28,15 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
   // add body fields
   req.body.user = req.body.user ? req.body.user : req.user.id;
 
-  req.body.duration = service.duration;
+  req.body.schedule_date = service.schedule_date;
+  req.body.amount = req.body.amount;
   req.body.service = req.params.serviceId;
+  req.body.address = req.body.address ? req.body.address : req.user.address;
 
-  const booking = await create.Booking(req.body);
+  const booking = await Booking.create(req.body);
 
   //retrieve services & orderId from booking
-  const details = await getDetails(booking._id);
+  const details = await OrderDetails.find(booking._id);
 
   //create confirm url
   const bookingURL = `${req.protocol}://${req.get(

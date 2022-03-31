@@ -1,7 +1,6 @@
-const { builtinModules } = require("module");
 const mongoose = require("mongoose");
 
-const BookingsSchema = new mongoose.SchemaType(
+const BookingSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -18,7 +17,11 @@ const BookingsSchema = new mongoose.SchemaType(
       type: String,
       enum: ["Pending", "Ongoing", "Completed"],
     },
-    user: {
+    amount: {
+      type: Number,
+      requried: true,
+    },
+    userId: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
       required: true,
@@ -33,7 +36,13 @@ const BookingsSchema = new mongoose.SchemaType(
       ref: "OrderDetails",
       required: true,
     },
+    priceDetails: {
+      id: { type: String },
+      status: { type: String },
+      update_time: { type: String },
+      email_address: { type: String },
+    },
   },
   { timestamps: true }
 );
-module.exports = mongoose.model("Bookings", BookingsSchema);
+module.exports = mongoose.model("Booking", BookingSchema);

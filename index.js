@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const logger = require("./middleware/logger");
@@ -14,6 +15,8 @@ const vendor = require("./routes/vendor");
 const orderList = require("./routes/orderList");
 const service = require("./routes/services");
 const order = require("./routes/orders");
+const user = require("./routes/users");
+const booking = require("./routes/bookings");
 
 //LOAD ENV VARS
 dotenv.config();
@@ -34,6 +37,8 @@ app.use("/api/v1/vendor", vendor);
 app.use("/api/v1/orderList", orderList);
 app.use("/api/v1/service", service);
 app.use("/api/v1/order", order);
+app.use("/api/v1/users", user);
+app.use("/api/v1/bookings", booking);
 
 //cookie parser
 app.use(cookieParser());
@@ -49,6 +54,8 @@ app.use(errorHandler);
 
 //fileupload
 app.use(fileupload());
+
+app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || 5000;
 

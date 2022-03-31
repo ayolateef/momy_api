@@ -18,7 +18,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Not authorize to access this route", 401));
   }
   // var options = {
-  //   authorization: YOUR_API_KEY,
+  // authorization: YOUR_API_KEY,
   //   message: "YOUR_MESSAGE_HERE",
   //   numbers: ["9999999999", "8888888888"],
   // };
